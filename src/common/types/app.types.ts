@@ -18,3 +18,24 @@ export interface IAppSharedDto extends TypeAppID {
 	createdAt: Date
 	updatedAt: Date
 }
+
+export interface IAppEnCrypto {
+	encrypted: string
+	iv: string
+	tag: string
+}
+
+export interface IPaginationConfig {
+	total: number
+	limit: number
+	offset: number
+}
+
+export interface IGetAllDataWithMeta<T> {
+	data: T[]
+	meta: IPaginationConfig
+}
+
+export interface IAppCountShared {
+	count: string
+}

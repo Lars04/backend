@@ -1,7 +1,8 @@
 import bcrypt from 'bcrypt'
 import { v4 as uuidV4 } from 'uuid'
 import type { Logger } from 'winston'
-import type { UserModel } from '../admin/admin.model'
+
+import type { AdminModel } from '../admin/admin.model'
 import type { IUser } from '../app/db/types/user.types'
 import { BaseConfig } from '../common/abstract/base-config.common'
 import { APP_CONFIG } from '../common/config/app.config'
@@ -32,7 +33,7 @@ export class AuthService extends BaseConfig {
 	constructor(
 		private model: AuthModel,
 		private tokenService: SessionService,
-		private userModel: UserModel,
+		private userModel: AdminModel,
 		private logger: Logger
 	) {
 		super()

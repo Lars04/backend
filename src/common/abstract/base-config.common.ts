@@ -1,4 +1,9 @@
+import type { Logger } from 'winston'
+import { pool } from '../../app/check-db.app'
+import { ROLES } from '../../app/enums'
 import { APP_EXPIRES_CONFIG, APP_SESSIONS_CONFIG } from '../config/app.config'
+import type { IAppCountShared } from '../types/app.types'
+import { responseErrorDB } from '../utils/app/errorResponse.utils'
 import { writeHeadData } from '../utils/app/writeHeadData.utils'
 
 export abstract class BaseConfig {
@@ -39,4 +44,33 @@ export abstract class BaseConfig {
 		'Unfortunately, your confirmation time has expired, please register again.'
 	// Utils =============================
 	protected headData = writeHeadData(400)
+	protected isAdminHandler = (role: number): boolean => role === ROLES.ADMIN
+
+	protected async getModelCount(
+		table: string,
+		logger: Logger,
+		where: string | null = null,
+		whereValue: string | number | null = null
+	): Promise<number | null> {
+		try {
+			const query = where
+				? `SELECT COUNT(*) FROM ${table} WHERE ${where} = $1`
+				: `SELECT COUNT(*) FROM ${table}`
+			const result = where
+				? await pool.query(query, [whereValue])
+				: await pool.query<IAppCountShared>(query)
+
+			if (!result.rows[0]?.count) return null
+
+			return Number(result.rows[0].count)
+		} catch (error) {
+			const errorMessage = responseErrorDB(
+				logger,
+				error,
+				'Error get-all counts to rooms:'
+			)
+
+			return errorMessage
+		}
+	}
 }

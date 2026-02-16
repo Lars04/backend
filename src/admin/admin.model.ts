@@ -4,13 +4,14 @@ import type { IUser, TypeUserID } from '../app/db/types/user.types'
 import { DB_TABLE_USERS } from '../common/constants/db.constants'
 import type { IAppMessage } from '../common/types/app.types'
 import { responseErrorDB } from '../common/utils/app/errorResponse.utils'
-import type { AdminUserEditDto } from './types/dto.types'
+
+import type { AdminUserEditDto } from './dto/admin.dto'
 import type { TypeUserClientRes } from './types/model.types'
 
-export class UserModel {
+export class AdminModel {
 	private getModelData = `id, first_name, 
-			last_name, email, phone, picture, 
-			role, is_verify, created_at, updated_at`
+			last_name, email, phone, 
+			role, is_verify, is_active_license, created_at, updated_at`
 
 	constructor(private pool: Pool, private logger: Logger) {}
 
@@ -54,8 +55,7 @@ export class UserModel {
 
 	async editUserModel(
 		userId: string,
-		dto: AdminUserEditDto,
-		imagePath: string | undefined
+		dto: AdminUserEditDto
 	): Promise<TypeUserID | null> {
 		try {
 			const query = `UPDATE ${DB_TABLE_USERS} SET
@@ -63,11 +63,11 @@ export class UserModel {
 			last_name = COALESCE($2, last_name), 
 			email = COALESCE($3, email), 
 			phone = COALESCE($4, phone), 
-			picture = COALESCE($5, picture), 
-			role = COALESCE($6, role), 
-			is_verify = COALESCE($7, is_verify), 
+			role = COALESCE($5, role), 
+			is_verify = COALESCE($6, is_verify), 
+			is_active_license = COALESCE($7, is_active_license),
 			password = COALESCE($8, password)
-			WHERE id = $10
+			WHERE id = $9
 			RETURNING id
 			`
 
@@ -76,9 +76,9 @@ export class UserModel {
 				dto.lastName,
 				dto.email,
 				dto.phone,
-				imagePath,
 				dto.role,
 				dto.isVerify,
+				dto.isActiveLicense,
 				dto.password,
 				userId,
 			])

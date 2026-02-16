@@ -4,7 +4,6 @@ export const APP_CONFIG = {
 	HOSTNAME: process.env.HOSTNAME,
 	CLIENT_URL: process.env.CLIENT_URL,
 	CLIENT_PROFILE_URL: process.env.CLIENT_PROFILE_URL,
-	ADMIN_PASS: process.env.ADMIN_PASS,
 	API_URL: process.env.API_URL,
 	USER_DEFAULT_PASS: process.env.USER_DEFAULT_PASS,
 } as const
@@ -35,4 +34,11 @@ export const APP_EMAIL_CONFIG = {
 	SMTP_PORT: Number(process.env.SMTP_PORT),
 	SMTP_USER: process.env.SMTP_USER,
 	SMTP_PASSWORD: process.env.SMTP_PASSWORD,
+} as const
+
+export const APP_ADMIN_CONFIG = {
+	ADMIN_EMAIL: process.env.ADMIN_EMAIL,
+	ADMIN_PHONE: process.env.ADMIN_PHONE,
+	ADMIN_IS_VERIFY: Boolean(process.env.ADMIN_IS_VERIFY),
+	ADMIN_PASS: process.env.ADMIN_PASS,
 } as const

@@ -1,7 +1,11 @@
 import type { Pool } from 'pg'
 import type { Logger } from 'winston'
 import type { ISession } from '../app/db/types/session.types'
-import type { IUser, ReturnCreateUserType } from '../app/db/types/user.types'
+import type {
+	IUser,
+	ReturnCreateUserType,
+	TypeUserIDWithRole,
+} from '../app/db/types/user.types'
 import {
 	DB_TABLE_SESSIONS,
 	DB_TABLE_USERS,
@@ -10,6 +14,35 @@ import type { ForgetDto, RegistrationDto } from './types/dto.types'
 
 export class AuthModel {
 	constructor(private pool: Pool, private logger: Logger) {}
+
+	async createAdminUserModel(
+		dto: RegistrationDto,
+		activationLink: string,
+		resetPassLink: string,
+		isVerify: boolean,
+		role: number
+	): Promise<TypeUserIDWithRole | undefined> {
+		const query = `
+				INSERT INTO ${DB_TABLE_USERS} 
+				(first_name, last_name, email, phone, password, activation_link, reset_pass_link, is_verify, role)
+				VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+				RETURNING id, role
+			`
+
+		const queryResult = await this.pool.query<TypeUserIDWithRole>(query, [
+			dto.firstName,
+			dto.lastName,
+			dto.email,
+			dto.phone,
+			dto.password,
+			activationLink,
+			resetPassLink,
+			isVerify,
+			role,
+		])
+
+		return queryResult.rows[0]
+	}
 
 	async createUserModel(
 		dto: RegistrationDto,

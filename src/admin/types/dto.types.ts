@@ -1,8 +1,6 @@
-import { EditProfileDto } from '../../profile/types/dto.types'
+import type { IUserDto } from '../../auth/dto/user.dto'
 
-export class AdminUserEditDto extends EditProfileDto {
-	email: string | undefined
-	role: number | undefined
-	isVerify: boolean | undefined
-	password: string | undefined
-}
+export type TypeAdminUserDto = Omit<
+	IUserDto,
+	'enableResetPass' | 'enableTwoFactoryChallenge'
+>
