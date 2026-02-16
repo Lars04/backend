@@ -3,6 +3,7 @@ import { body } from 'express-validator'
 import { ROLES } from '../app/enums'
 import { authenticated } from '../auth/middleware/auth.middleware'
 import { hasRole } from '../auth/middleware/hasRole.middleware'
+import { validateRequest } from '../common/middleware/validate.middleware'
 import { licenseController } from './index.license'
 
 const routerLicense = Router({ mergeParams: true })
@@ -26,7 +27,9 @@ routerLicense.post(
 		.trim()
 		.notEmpty()
 		.withMessage('Дата истечения обязательна')
-		.isDate(),
+		.isISO8601(),
+
+	validateRequest,
 
 	licenseController.createLicense.bind(licenseController)
 )
@@ -42,14 +45,26 @@ routerLicense.get(
 	// @ts-ignore
 	licenseController.getOneLicense.bind(licenseController)
 )
-routerLicense.patch(
+routerLicense.put(
 	'/edit/:licenseId',
 	authenticated,
 	// @ts-ignore
 	hasRole([ROLES.ADMIN]),
-	body('userId').trim().isString(),
-	body('license').trim().isString(),
-	body('expiresLicenseAt').trim().isDate(),
+
+	body('license')
+		.trim()
+		.notEmpty()
+		.withMessage('Лицензия обязательна')
+		.isString(),
+
+	body('expiresLicenseAt')
+		.trim()
+		.notEmpty()
+		.withMessage('Дата истечения обязательна')
+		.isISO8601(),
+
+	validateRequest,
+
 	licenseController.editLicense.bind(licenseController)
 )
 routerLicense.delete(

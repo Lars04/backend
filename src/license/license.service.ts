@@ -6,7 +6,11 @@ import type {
 	IGetAllDataWithMeta,
 } from '../common/types/app.types'
 import { ApiError } from '../common/utils/log/exists-error.log'
-import { LicenseDto, type CreateAndEditLicenseDto } from './dto/license.dto'
+import {
+	CreateLicenseDto,
+	LicenseDto,
+	type EditLicenseDto,
+} from './dto/license.dto'
 import type { LicenseModel } from './license.model'
 import type { ILicenseDto } from './types/dto.types'
 
@@ -15,9 +19,7 @@ export class LicenseService extends BaseConfig {
 		super()
 	}
 
-	async addLicense(
-		dto: CreateAndEditLicenseDto
-	): Promise<IAppMessage | ApiError> {
+	async addLicense(dto: CreateLicenseDto): Promise<IAppMessage | ApiError> {
 		if (!dto.expiresLicenseAt || !dto.license || !dto.userId)
 			return ApiError.BadRequest(
 				'Invalid-body create license dto is not defend!'
@@ -43,7 +45,7 @@ export class LicenseService extends BaseConfig {
 		const total = await this.getModelCount(
 			DB_TABLE_LICENSE,
 			this.logger,
-			!isAdmin ? userId : undefined,
+			!isAdmin ? 'user_id' : undefined,
 			!isAdmin ? userId : undefined
 		)
 		const allLicense = await this.model.getAllLicense(
@@ -91,7 +93,7 @@ export class LicenseService extends BaseConfig {
 
 	async updateLicense(
 		licenseId: string | string[] | undefined,
-		dto: CreateAndEditLicenseDto
+		dto: EditLicenseDto
 	): Promise<IAppMessage | ApiError> {
 		if (!licenseId || typeof licenseId !== 'string')
 			return ApiError.NotFound('License not founded!')

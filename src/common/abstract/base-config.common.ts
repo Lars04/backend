@@ -67,7 +67,7 @@ export abstract class BaseConfig {
 			const errorMessage = responseErrorDB(
 				logger,
 				error,
-				'Error get-all counts to rooms:'
+				`Error get-all counts to ${table}:`
 			)
 
 			return errorMessage

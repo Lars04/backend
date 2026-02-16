@@ -4,12 +4,12 @@ import type { ILicense } from '../app/db/types/license.types'
 import { DB_TABLE_LICENSE } from '../common/constants/db.constants'
 import type { TypeAppID } from '../common/types/app.types'
 import { responseErrorDB } from '../common/utils/app/errorResponse.utils'
-import type { CreateAndEditLicenseDto } from './dto/license.dto'
+import type { CreateLicenseDto, EditLicenseDto } from './dto/license.dto'
 
 export class LicenseModel {
 	constructor(private pool: Pool, private logger: Logger) {}
 
-	async createLicense(dto: CreateAndEditLicenseDto): Promise<TypeAppID | null> {
+	async createLicense(dto: CreateLicenseDto): Promise<TypeAppID | null> {
 		try {
 			const query = `
 				INSERT INTO ${DB_TABLE_LICENSE}
@@ -103,20 +103,19 @@ export class LicenseModel {
 
 	async editLicense(
 		licenseId: string,
-		dto: CreateAndEditLicenseDto
+		dto: EditLicenseDto
 	): Promise<TypeAppID | null> {
+		console.log(dto)
 		try {
 			const query = `
 				UPDATE ${DB_TABLE_LICENSE} SET
-				user_id = COALESCE($1, user_id),
-				license = COALESCE($2, license),
-				expire_license_at = COALESCE($3, expire_license_at)
-				WHERE id = $4
+				license = $1,
+				expires_license_at = $2
+				WHERE id = $3
 				RETURNING id
 			`
 			const queryResult = await this.pool.query<TypeAppID>(query, [
-				dto.userId,
-				dto.license,
+				dto.license?.toUpperCase(),
 				dto.expiresLicenseAt,
 				licenseId,
 			])
@@ -128,7 +127,7 @@ export class LicenseModel {
 			const errorMessage = responseErrorDB(
 				this.logger,
 				error,
-				'Error update-user license:'
+				'Error update-user license'
 			)
 
 			return errorMessage

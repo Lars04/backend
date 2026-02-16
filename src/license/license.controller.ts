@@ -108,7 +108,7 @@ export class LicenseController {
 				return
 			}
 
-			res.status(201).json(updateLicense)
+			res.status(200).json(updateLicense)
 		} catch (error) {
 			await responseInternalServer(
 				error,

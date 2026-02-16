@@ -1,11 +1,14 @@
 import type { ILicense } from '../../app/db/types/license.types'
+import { encrypt } from '../../common/utils/app/crypto.util'
 import type { ILicenseDto } from '../types/dto.types'
 
-export class CreateAndEditLicenseDto {
+export class CreateLicenseDto {
 	userId: string | undefined
 	license: string | undefined
 	expiresLicenseAt: Date | undefined
 }
+
+export type EditLicenseDto = Omit<CreateLicenseDto, 'userId'>
 
 export class LicenseDto {
 	id: string
@@ -25,11 +28,15 @@ export class LicenseDto {
 	}
 
 	toPlain(): ILicenseDto {
+		const encryptedExpire = encrypt(this.expiresLicenseAt.toISOString())
+
 		return {
 			id: this.id,
 			userId: this.userId,
 			license: this.license,
-			expiresLicenseAt: this.expiresLicenseAt,
+			expiresLicenseAt: encryptedExpire.encrypted,
+			expiresLicenseIv: encryptedExpire.iv,
+			expiresLicenseTag: encryptedExpire.tag,
 			createdAt: this.createdAt,
 			updatedAt: this.updatedAt,
 		}
