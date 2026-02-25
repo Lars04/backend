@@ -56,8 +56,7 @@ export class AuthController extends BaseConfig {
 
 			res.setHeader(
 				'Set-cookie',
-				`refreshToken=${
-					user?.refreshToken
+				`refreshToken=${user?.refreshToken
 				}; httpOnly; path=/api; Expires=${user.expireRefreshTokenAt?.toUTCString()}; SameSite=Strict`
 			)
 			res.status(200).json(userDto)
@@ -172,8 +171,7 @@ export class AuthController extends BaseConfig {
 
 			res.setHeader(
 				'Set-cookie',
-				`refreshToken=${
-					newRefresh?.refreshToken
+				`refreshToken=${newRefresh?.refreshToken
 				}; httpOnly; path=/api; Expires=${newRefresh.expireRefreshTokenAt.toUTCString()}; SameSite=Strict`
 			)
 			res.status(200).json({ accessToken: newRefresh.accessToken })

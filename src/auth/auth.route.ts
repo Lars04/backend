@@ -7,7 +7,7 @@ const routerAuth = Router({ mergeParams: true })
 routerAuth.post(
 	'/registration',
 	body('email').isEmail(),
-	body('password').isString().isLength({ min: 3, max: 32 }),
+	body('password').isString().isLength({ min: 4, max: 32 }),
 	authController.registration.bind(authController)
 )
 routerAuth.post(

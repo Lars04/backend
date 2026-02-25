@@ -179,20 +179,20 @@ export class AuthService extends BaseConfig {
 				isExpireVerifyMessage
 					? this.expireMessage
 					: isRemoveExpireVerifyMessage
-					? this.errorAgainExpireMessage
-					: candidate.email
-					? errorEmailMessage
-					: errorPhoneMessage
+						? this.errorAgainExpireMessage
+						: candidate.email
+							? errorEmailMessage
+							: errorPhoneMessage
 			)
 
 			return {
 				message: isExpireVerifyMessage
 					? this.expireMessage
 					: isRemoveExpireVerifyMessage
-					? this.errorAgainExpireMessage
-					: candidate.email
-					? errorEmailMessage
-					: errorPhoneMessage,
+						? this.errorAgainExpireMessage
+						: candidate.email
+							? errorEmailMessage
+							: errorPhoneMessage,
 				status: isExpireVerifyMessage ? 409 : 400,
 			}
 		}

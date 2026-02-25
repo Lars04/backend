@@ -1,8 +1,8 @@
 export const renderSendActivationLink = (
-	link: string,
-	content: string
+  link: string,
+  content: string
 ): string => {
-	return `
+  return `
 		 <table width="100%" cellpadding="0" cellspacing="0" style="padding:40px 0;">
       <tr>
         <td align="center">
@@ -50,7 +50,7 @@ export const renderSendActivationLink = (
 }
 
 export const renderSendActivationTwoFactoryAuth = (code: string): string => {
-	return `
+  return `
   <table width="100%" cellpadding="0" cellspacing="0" style="padding:40px 0; background-color:#f5f5f5;">
     <tr>
       <td align="center">

@@ -121,8 +121,8 @@ export class EmailService extends BaseConfig {
 		this.isFirstSendEmailVerifyAccount = false
 
 		return {
-			message: !isTimeCheck ? repaidExpireMessage : errorEmailMessage,
-			status: !isTimeCheck ? 409 : 400,
+			message: repaidExpireMessage,
+			status: 200,
 		}
 	}
 
