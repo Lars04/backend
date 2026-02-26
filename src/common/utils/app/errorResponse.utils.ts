@@ -52,6 +52,7 @@ export const responseErrorDB = (
 	error: unknown,
 	titleMessage: string
 ): null => {
+	console.error('=== RAW DB ERROR ===', error);
 	logger.error(
 		titleMessage,
 		error instanceof Error ? error.message : 'Internal-server database'

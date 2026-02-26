@@ -5,7 +5,7 @@ import { responseInternalServer } from '../common/utils/app/errorResponse.utils'
 import type { LicenseService } from './license.service'
 
 export class LicenseController {
-	constructor(private service: LicenseService, private logger: Logger) {}
+	constructor(private service: LicenseService, private logger: Logger) { }
 
 	async createLicense(req: IRequestUserApp, res: Response): Promise<void> {
 		try {
@@ -57,6 +57,30 @@ export class LicenseController {
 				error,
 				res,
 				'Internal-server from get-all license controller',
+				this.logger
+			)
+		}
+	}
+
+	async getLicenseStatus(req: IRequestUserApp, res: Response): Promise<void> {
+		try {
+			const userId = req.user?.sub
+			const resultStatus = await this.service.getUserLicenseStatus(userId)
+
+			if ('message' in resultStatus) {
+				res
+					.status(resultStatus.status)
+					.json({ message: resultStatus.message })
+
+				return
+			}
+
+			res.status(200).json(resultStatus)
+		} catch (error) {
+			await responseInternalServer(
+				error,
+				res,
+				'Internal-server from get license status controller',
 				this.logger
 			)
 		}

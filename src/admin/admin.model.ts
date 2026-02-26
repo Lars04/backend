@@ -1,7 +1,7 @@
 import type { Pool } from 'pg'
 import type { Logger } from 'winston'
 import type { IUser, TypeUserID } from '../app/db/types/user.types'
-import { DB_TABLE_USERS } from '../common/constants/db.constants'
+import { DB_TABLE_LICENSE, DB_TABLE_USERS } from '../common/constants/db.constants'
 import type { IAppMessage } from '../common/types/app.types'
 import { responseErrorDB } from '../common/utils/app/errorResponse.utils'
 
@@ -9,18 +9,29 @@ import type { AdminUserEditDto } from './dto/admin.dto'
 import type { TypeUserClientRes } from './types/model.types'
 
 export class AdminModel {
-	private getModelData = `id, first_name, 
-			last_name, email, phone, 
-			role, is_verify, is_active_license, created_at, updated_at`
+	private getModelData = `
+		u.id, u.first_name, u.last_name, u.email, u.phone,
+		u.role, u.is_verify, u.is_active_license, u.created_at, u.updated_at,
+		l.expires_license_at, l.license AS license_type
+	`
 
-	constructor(private pool: Pool, private logger: Logger) {}
+	constructor(private pool: Pool, private logger: Logger) { }
 
 	async getAllUserModel(
 		limit: number,
 		offset: number
 	): Promise<TypeUserClientRes[]> {
-		const query = `SELECT ${this.getModelData} FROM ${DB_TABLE_USERS}
-			ORDER BY created_at DESC
+		const query = `
+			SELECT ${this.getModelData}
+			FROM ${DB_TABLE_USERS} u
+			LEFT JOIN LATERAL (
+				SELECT expires_license_at, license
+				FROM ${DB_TABLE_LICENSE}
+				WHERE user_id = u.id
+				ORDER BY created_at DESC
+				LIMIT 1
+			) l ON true
+			ORDER BY u.created_at DESC
 			LIMIT $1 OFFSET $2
 		`
 
@@ -35,8 +46,17 @@ export class AdminModel {
 	async getUserByIdModel(userId: string): Promise<TypeUserClientRes | null> {
 		try {
 			const query = `
-			SELECT ${this.getModelData} FROM ${DB_TABLE_USERS} 
-			WHERE id = $1`
+				SELECT ${this.getModelData}
+				FROM ${DB_TABLE_USERS} u
+				LEFT JOIN LATERAL (
+					SELECT expires_license_at, license
+					FROM ${DB_TABLE_LICENSE}
+					WHERE user_id = u.id
+					ORDER BY created_at DESC
+					LIMIT 1
+				) l ON true
+				WHERE u.id = $1
+			`
 			const result = await this.pool.query<TypeUserClientRes>(query, [userId])
 
 			if (!result.rows[0]) return null

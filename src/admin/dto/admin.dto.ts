@@ -19,6 +19,8 @@ export class AdminUsersDto {
 	role: number
 	isVerify: boolean
 	isActiveLicense: boolean
+	expiresLicenseAt: Date | null
+	licenseType: string | null
 	createdAt: Date
 	updatedAt: Date
 
@@ -29,6 +31,8 @@ export class AdminUsersDto {
 		this.email = data.email
 		this.phone = data.phone
 		this.isActiveLicense = data.is_active_license
+		this.expiresLicenseAt = data.expires_license_at ?? null
+		this.licenseType = data.license_type ?? null
 		this.role = data.role
 		this.isVerify = data.is_verify
 		this.createdAt = data.created_at
@@ -44,6 +48,8 @@ export class AdminUsersDto {
 			phone: this.phone,
 			isVerify: this.isVerify,
 			isActiveLicense: this.isActiveLicense,
+			expiresLicenseAt: this.expiresLicenseAt,
+			licenseType: this.licenseType,
 			role: this.role,
 			createdAt: this.createdAt,
 			updatedAt: this.updatedAt,

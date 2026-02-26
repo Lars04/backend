@@ -40,6 +40,12 @@ routerLicense.get(
 	licenseController.getAllLicense.bind(licenseController)
 )
 routerLicense.get(
+	'/status',
+	authenticated,
+	// @ts-ignore
+	licenseController.getLicenseStatus.bind(licenseController)
+)
+routerLicense.get(
 	'/one/:licenseId',
 	authenticated,
 	// @ts-ignore

@@ -70,6 +70,30 @@ export class LicenseService extends BaseConfig {
 		}
 	}
 
+	async getUserLicenseStatus(
+		userId: string | undefined
+	): Promise<{ expiresAt: Date; isActive: boolean } | ApiError> {
+		if (!userId || typeof userId !== 'string')
+			return ApiError.NotFound('User-data is not founded')
+
+		// Get only the most recent license for this user
+		const latestLicense = await this.model.getAllLicense(
+			false, // isAdmin = false
+			userId,
+			1,     // limit = 1
+			0      // offset = 0
+		)
+
+		if (!latestLicense?.length)
+			return ApiError.NotFound('No license found for user')
+
+		const license = latestLicense[0]!
+		const expiresAt = license.expires_license_at
+		const isActive = expiresAt.getTime() > Date.now()
+
+		return { expiresAt, isActive }
+	}
+
 	async findOneLicense(
 		licenseId: string | string[] | undefined,
 		userId: string | undefined,

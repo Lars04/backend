@@ -30,6 +30,7 @@ const startApp = async (): Promise<void> => {
 		// Запуск сервера
 		app.listen(port, () => {
 			logger.info(`🚀 Сервер запущен на http://localhost:${port}`)
+			setInterval(() => { }, 1000 * 60 * 60); // keep alive
 		})
 	} catch (error) {
 		logger.error(`❌ Ошибка запуска сервера: ${error}`)

@@ -1,34 +1,51 @@
 import type { Pool, QueryResult } from 'pg'
 import type { Logger } from 'winston'
 import type { ILicense } from '../app/db/types/license.types'
-import { DB_TABLE_LICENSE } from '../common/constants/db.constants'
+import { DB_TABLE_LICENSE, DB_TABLE_USERS } from '../common/constants/db.constants'
 import type { TypeAppID } from '../common/types/app.types'
 import { responseErrorDB } from '../common/utils/app/errorResponse.utils'
 import type { CreateLicenseDto, EditLicenseDto } from './dto/license.dto'
 
 export class LicenseModel {
-	constructor(private pool: Pool, private logger: Logger) {}
+	constructor(private pool: Pool, private logger: Logger) { }
 
 	async createLicense(dto: CreateLicenseDto): Promise<TypeAppID | null> {
+		console.log('=== CREATE LICENSE DTO ===', JSON.stringify(dto))
 		try {
+			await this.pool.query('BEGIN')
+
 			const query = `
 				INSERT INTO ${DB_TABLE_LICENSE}
 				(user_id, license, expires_license_at)
 				VALUES ($1, $2, $3)
+				ON CONFLICT (user_id) DO UPDATE SET
+					license = EXCLUDED.license,
+					expires_license_at = EXCLUDED.expires_license_at,
+					updated_at = now()
 				RETURNING id
 			`
 			const queryResult = await this.pool.query<TypeAppID>(query, [
 				dto.userId,
-				dto.license,
+				dto.license?.toUpperCase(),
 				dto.expiresLicenseAt,
 			])
 
+			const updateUserQuery = `
+				UPDATE ${DB_TABLE_USERS}
+				SET is_active_license = true
+				WHERE id = $1
+			`
+			await this.pool.query(updateUserQuery, [dto.userId])
+
+			await this.pool.query('COMMIT')
 			return queryResult.rows[0] ?? null
 		} catch (error) {
+			await this.pool.query('ROLLBACK')
+			console.error('=== CREATE LICENSE ERROR ===', error instanceof Error ? error.message : error)
 			const errorMessage = responseErrorDB(
 				this.logger,
 				error,
-				'Error create license:'
+				`Error create license: ${error instanceof Error ? error.message : 'Unknown error'}`
 			)
 
 			return errorMessage
