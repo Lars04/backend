@@ -175,8 +175,7 @@ export class EmailService extends BaseConfig {
 				}
 
 			this.isFirstSendEmailForgetPassword = true
-
-			return ApiError.BadRequest('Expire reset verify time that all')
+			// Continue to send a new reset email below (don't return error)
 		}
 
 		const resetLink = resetPassLinkHandler(

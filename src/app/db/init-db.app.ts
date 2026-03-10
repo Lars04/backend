@@ -34,6 +34,41 @@ export const initDB = async (): Promise<void> => {
 		await pool.query(initTablesSqlDB)
 		await pool.query(initTriggerSqlDB)
 
+		// Migrate existing columns from TIMESTAMP to TIMESTAMPTZ — runs only once
+		try {
+			await pool.query(`
+				DO $$
+				BEGIN
+					-- Only migrate if expires_license_at is still plain TIMESTAMP (without timezone)
+					IF EXISTS (
+						SELECT 1 FROM information_schema.columns
+						WHERE table_schema = 'public'
+						  AND table_name   = 'license'
+						  AND column_name  = 'expires_license_at'
+						  AND data_type    = 'timestamp without time zone'
+					) THEN
+						ALTER TABLE public.users
+							ALTER COLUMN created_at TYPE TIMESTAMPTZ USING created_at AT TIME ZONE 'UTC',
+							ALTER COLUMN updated_at TYPE TIMESTAMPTZ USING updated_at AT TIME ZONE 'UTC';
+
+						ALTER TABLE public.sessions
+							ALTER COLUMN expires_token_at      TYPE TIMESTAMPTZ USING expires_token_at      AT TIME ZONE 'UTC',
+							ALTER COLUMN expires_forget_pass_at TYPE TIMESTAMPTZ USING expires_forget_pass_at AT TIME ZONE 'UTC',
+							ALTER COLUMN created_at            TYPE TIMESTAMPTZ USING created_at            AT TIME ZONE 'UTC',
+							ALTER COLUMN updated_at            TYPE TIMESTAMPTZ USING updated_at            AT TIME ZONE 'UTC';
+
+						ALTER TABLE public.license
+							ALTER COLUMN expires_license_at TYPE TIMESTAMPTZ USING expires_license_at AT TIME ZONE 'UTC',
+							ALTER COLUMN created_at         TYPE TIMESTAMPTZ USING created_at         AT TIME ZONE 'UTC',
+							ALTER COLUMN updated_at         TYPE TIMESTAMPTZ USING updated_at         AT TIME ZONE 'UTC';
+					END IF;
+				END
+				$$;
+			`)
+		} catch (error) {
+			logger.warn('Timestamp migration notice: ' + (error instanceof Error ? error.message : String(error)))
+		}
+
 		logger.info('✅ Database success init')
 
 		const adminEmail = APP_ADMIN_CONFIG.ADMIN_EMAIL

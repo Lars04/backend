@@ -167,4 +167,15 @@ export class LicenseModel {
 			return errorMessage
 		}
 	}
+
+	async getUserActiveStatus(userId: string): Promise<boolean> {
+		try {
+			const query = `SELECT is_active_license FROM ${DB_TABLE_USERS} WHERE id = $1`
+			const queryResult = await this.pool.query(query, [userId])
+			return queryResult.rows[0]?.is_active_license ?? false
+		} catch (error) {
+			this.logger.error('Error getting user active status', error instanceof Error ? error.message : String(error))
+			return false
+		}
+	}
 }

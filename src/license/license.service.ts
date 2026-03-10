@@ -72,7 +72,7 @@ export class LicenseService extends BaseConfig {
 
 	async getUserLicenseStatus(
 		userId: string | undefined
-	): Promise<{ expiresAt: Date; isActive: boolean } | ApiError> {
+	): Promise<{ expiresAt: Date; createdAt: Date; isActive: boolean } | ApiError> {
 		if (!userId || typeof userId !== 'string')
 			return ApiError.NotFound('User-data is not founded')
 
@@ -89,9 +89,14 @@ export class LicenseService extends BaseConfig {
 
 		const license = latestLicense[0]!
 		const expiresAt = license.expires_license_at
-		const isActive = expiresAt.getTime() > Date.now()
+		// Use updated_at as the start date — it reflects the most recent renewal
+		// (created_at is the original insert date and doesn't change on renewal)
+		const createdAt = license.updated_at ?? license.created_at
 
-		return { expiresAt, isActive }
+		const userActive = await this.model.getUserActiveStatus(userId)
+		const isActive = expiresAt.getTime() > Date.now() && userActive
+
+		return { expiresAt, createdAt, isActive }
 	}
 
 	async findOneLicense(
